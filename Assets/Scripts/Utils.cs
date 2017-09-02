@@ -3,7 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class Utils {
+public struct RectBounds
+{
+    public float LeftBound;
+    public float RightBound;
+    public float UpperBound;
+    public float LowerBound;
+}
+
+public static class Utils
+{
+    public static System.Random Rand = new System.Random();
 
     public static void Shift(this Transform transform, float xShift, float yShift, float zShift)
     {
@@ -38,6 +48,42 @@ public static class Utils {
     public static Vector3 SetZ(this Vector3 vec, float newZ)
     {
         return new Vector3(vec.x, vec.y, newZ);
+    }
+
+    public static RectBounds GetCamWorldBounds(this Camera cam, float padding = 0.0f)
+    {
+        RectBounds bounds = new RectBounds()
+        {
+            UpperBound = cam.orthographicSize + cam.transform.position.x - padding,
+            RightBound = cam.orthographicSize * cam.aspect + cam.transform.position.y - padding
+        };
+
+        bounds.LeftBound = -bounds.RightBound + padding;
+        bounds.LowerBound = -bounds.UpperBound + padding;
+        return bounds;
+    }
+
+    public static T GetRandom<T>(this IList<T> list)
+    {
+        if (list.Count == 0)
+        {
+            return default(T);
+        }
+
+        return list[UnityEngine.Random.Range(0, list.Count)];
+    }
+
+    public static void Shuffle<T>(this IList<T> list)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = Utils.Rand.Next(n + 1);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
+        }
     }
 }
 
@@ -164,3 +210,4 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         }
     }
 }
+
